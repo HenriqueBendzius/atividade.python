@@ -1,0 +1,66 @@
+import cv2
+import numpy as np
+
+# Função para aplicar máscara de convolução
+def apply_kernel(frame, kernel):
+    return cv2.filter2D(frame, -1, kernel)
+
+# Função para capturar frames do vídeo
+def capture_frames(video_source):
+    cap = cv2.VideoCapture(video_source)
+    
+    while True:
+        ret, frame = cap.read()
+        
+        if not ret:
+            break
+        
+        yield frame
+
+# Função para processar frames
+def process_frames(frames, kernel):
+    for frame in frames:
+        # Aplicar a máscara de convolução
+        processed_frame = apply_kernel(frame, kernel)
+        
+        # Exibir o resultado
+        cv2.imshow('Processed Frame', processed_frame)
+        
+        # Condição de parada
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+# Definição das máscaras de convolução
+def get_kernels():
+    # Máscara para detecção de bordas (Sobel X)
+    sobel_x_kernel = np.array([[-1, 0, 1],
+                               [-2, 0, 2],
+                               [-1, 0, 1]])
+    
+    # Máscara para desfoque (média)
+    blur_kernel = np.ones((5, 5)) / 25
+    
+    return sobel_x_kernel, blur_kernel
+
+# Main
+if __name__ == "__main__":
+    # Escolher a fonte do vídeo (0 para webcam, ou caminho para um arquivo .mp4)
+    video_source = 'carnaval.mp4'  # Caminho para o arquivo .mp4
+    
+    # Obter as máscaras de convolução
+    sobel_x_kernel, blur_kernel = get_kernels()
+    
+    # Capturar e processar frames
+    frames = capture_frames(video_source)
+    
+    # Processar com a máscara de Sobel X
+    print("Pressione 'q' para parar.")
+    process_frames(frames, sobel_x_kernel)
+    
+    # Reiniciar a captura para processar com a máscara de desfoque
+    frames = capture_frames(video_source)
+    process_frames(frames, blur_kernel)
+
+    cv2.destroyAllWindows()
+
+arrumar esse codigo.
